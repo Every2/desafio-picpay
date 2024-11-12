@@ -1,0 +1,3 @@
+[database]
+connection_string = "your_db_name.db"
+driver_name = "sqlite3"
