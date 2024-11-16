@@ -73,13 +73,13 @@ func (ur UsersRepository) FindUserById(id int) (*models.Users, *models.ResponseE
 	}
 
 	defer rows.Close()
-	var firstName, lastName, uDocument, email string
+	var firstName, lastName, document, email string
 	var userId int
 	var balance decimal.Big
 	var userType models.UserEnum
 
 	for rows.Next() {
-		err := rows.Scan(&userId, &firstName, &lastName, &uDocument, &email, &balance, &userType)
+		err := rows.Scan(&userId, &firstName, &lastName, &document, &email, &balance, &userType)
 		if err != nil {
 			return nil, &models.ResponseError{
 				Message: err.Error(),
@@ -90,10 +90,10 @@ func (ur UsersRepository) FindUserById(id int) (*models.Users, *models.ResponseE
 	}
 
 	return &models.Users{
-		ID: id,
+		ID: userId,
 		FirstName: firstName,
 		LastName: lastName,
-		Document: uDocument,
+		Document: document,
 		Email: email,
 		UserType: userType,
 	}, nil
