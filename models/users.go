@@ -2,11 +2,11 @@ package models
 
 import "github.com/ericlagergren/decimal"
 
-type usertype int
+type UserEnum int
 
 const (
-	COMMON usertype = iota
-	MERCHANT usertype = iota
+	COMMON UserEnum = iota
+	MERCHANT UserEnum = iota
 )
 
 type Users struct {
@@ -15,7 +15,7 @@ type Users struct {
 	LastName string `json:"last_name"`
 	Document string `json:"document"`
 	Email string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"password,omitempty"`
 	Balance decimal.Big `json:"balance"`
-	UserType usertype `json:"user_type"`
+	UserType UserEnum `json:"user_type"`
 }
