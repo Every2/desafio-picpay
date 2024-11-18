@@ -9,6 +9,14 @@ const (
 	MERCHANT UserEnum = iota
 )
 
+func (u UserEnum) String() string {
+	return [...]string{"COMMON", "MERCHANT"}[u-1]
+}
+
+func (u UserEnum) GetType() int {
+	return int(u)
+}
+
 type Users struct {
 	ID int `json:"id"`
     FirstName string `json:"first_name"`
