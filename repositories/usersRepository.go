@@ -10,6 +10,7 @@ import (
 
 type UsersRepository struct {
 	dbHandler *sql.DB
+	transaction *sql.Tx
 }
 
 func NewUsersRepository(dbHandler *sql.DB) *UsersRepository {
