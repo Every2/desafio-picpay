@@ -1,52 +1,62 @@
 package services
 
 import (
-	"net/http"
-
+	"errors"
 	"github.com/Every2/desafio-picpay/models"
 	"github.com/Every2/desafio-picpay/repositories"
-	"github.com/ericlagergren/decimal"
+	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
-type UsersService struct {
-	usersRepository *repositories.UsersRepository
+
+type UserService struct {
+	repo *repositories.UserRepository
+	db   *gorm.DB
 }
 
-func NewUserService(userRepository *repositories.UsersRepository) UsersService {
-	return UsersService{
-		usersRepository: userRepository,
+func NewUserService(repo *repositories.UserRepository) *UserService {
+	return &UserService{repo: repo}
+}
+
+func (s *UserService) ValidateTransaction(sender *models.User, amount decimal.Decimal) error {
+
+	if sender.UserType == models.MERCHANT {
+		return errors.New("usuário do tipo Lojista não está autorizado a realizar transação")
 	}
+
+	if sender.Balance.Cmp(amount) < 0 {
+		return errors.New("saldo insuficiente")
+	}
+
+	return nil
 }
 
-func (us UsersService) FindUserById(id int) (*models.Users, *models.ResponseError) {
-	user, err := us.usersRepository.FindUserById(id)
-	if err != nil {
-		return nil, err
+
+func (s *UserService) FindUserByID(id uint) (*models.User, error) {
+	return s.repo.FindByID(id)
+}
+
+
+func (s *UserService) CreateUser(userRequest models.UserRequest) (*models.User, error) {
+	user := &models.User{
+		FirstName: userRequest.FirstName,
+		LastName:  userRequest.LastName,
+		Document:  userRequest.Document,
+		Email:     userRequest.Email,
+		Password:  userRequest.Password,
+		UserType:  userRequest.UserType,
+		Balance:   userRequest.Balance,
+	}
+
+
+	if err := s.db.Save(user); err != nil {
+		return nil, err.Error
 	}
 
 	return user, nil
 }
 
-func (us UsersService) SaveUser() {
-	repositories.CommitTransaction(us.usersRepository)
-}
 
-func ValidateTransaction(sender *models.Users, amount decimal.Big) *models.ResponseError {
-	var u models.UserEnum = models.MERCHANT
-
-	if sender.UserType.GetType() == u.GetType() {
-		return &models.ResponseError{
-			Message: "Merchant is not autorized to do transactions",
-			Status: http.StatusBadRequest,
-		}
-	}
-
-	if (sender.Balance.Cmp(&amount) < 0) {
-		return &models.ResponseError{
-			Message: "Not enough amount",
-			Status: http.StatusBadRequest,
-		}
-	}
-
-	return nil
+func (s *UserService) SaveUser(user *models.User) error {
+	return s.db.Save(user).Error
 }

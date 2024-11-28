@@ -1,29 +1,33 @@
 package models
 
-import "github.com/ericlagergren/decimal"
+import "github.com/shopspring/decimal"
 
-type UserEnum int
+type UserEnum string
 
 const (
-	COMMON UserEnum = iota
-	MERCHANT UserEnum = iota
+	COMMON   UserEnum = "COMMON"
+	MERCHANT UserEnum = "MERCHANT"
 )
 
-func (u UserEnum) String() string {
-	return [...]string{"COMMON", "MERCHANT"}[u-1]
+type User struct {
+	ID        uint       `json:"id" gorm:"primaryKey"`
+	FirstName string     `json:"firstName"`
+	LastName  string     `json:"lastName"`
+	Document  string     `json:"document" gorm:"unique"`
+	Email     string     `json:"email" gorm:"unique"`
+	Password  string     `json:"-"`
+	Balance   decimal.Decimal `gorm:"type:decimal(10,2)" json:"balance"`
+	UserType  UserEnum   `json:"userType" gorm:"column:user_type"`
 }
 
-func (u UserEnum) GetType() int {
-	return int(u)
-}
-
-type Users struct {
-	ID int `json:"id"`
-    FirstName string `json:"first_name"`
-	LastName string `json:"last_name"`
-	Document string `json:"document"`
-	Email string `json:"email"`
-	Password string `json:"password,omitempty"`
-	Balance decimal.Big `json:"balance"`
-	UserType UserEnum `json:"user_type"`
+func NewUser(firstName, lastName, document, email, password string, balance decimal.Decimal, userType UserEnum) *User {
+	return &User{
+		FirstName: firstName,
+		LastName:  lastName,
+		Document:  document,
+		Email:     email,
+		Password:  password,
+		Balance:   balance,
+		UserType:  userType,
+	}
 }
